@@ -4,7 +4,7 @@ const fs = require('fs');
 const simpleGit = require('simple-git');
 const path = require('path');
 require('dotenv').config();
-const crypto = require('crypto');
+
 
 const app = express();
 const git = simpleGit();
@@ -18,32 +18,34 @@ app.use(bodyParser.urlencoded({ extended: false }));
 
 const usersFilePath = path.join(__dirname, 'data', 'account.json');
 const coursesFilePath = path.join(__dirname, 'data', 'purchase.json');
+// Получаем ключ шифрования из .env
+const ENCRYPTION_KEY = process.env.ENCRYPTION_KEY; // Например, 84578268387546481237648362847623875623
+const IV_LENGTH = parseInt(process.env.IV_LENGTH, 10) || 16; // Для совместимости с текущим кодом
 
-const rawKey = process.env.ENCRYPTION_KEY; // Длинный ключ из .env
-const ENCRYPTION_KEY = crypto.createHash('sha256').update(String(rawKey)).digest('base64').substr(0, 32); // Преобразуем в 32 байта
-const IV_LENGTH = parseInt(process.env.IV_LENGTH, 10) || 16; // Длина вектора инициализации
-
-if (!rawKey) {
+if (!ENCRYPTION_KEY) {
     console.error('Ошибка: Ключ шифрования (ENCRYPTION_KEY) отсутствует.');
     process.exit(1);
 }
 
 // Функция шифрования
 function encrypt(text) {
-    const iv = crypto.randomBytes(IV_LENGTH);
-    const cipher = crypto.createCipheriv('aes-256-cbc', Buffer.from(ENCRYPTION_KEY), iv);
-    let encrypted = cipher.update(text);
-    encrypted = Buffer.concat([encrypted, cipher.final()]);
-    return `${iv.toString('hex')}:${encrypted.toString('hex')}`;
+    const key = ENCRYPTION_KEY.slice(0, IV_LENGTH); // Берем первые IV_LENGTH символов ключа
+    let encrypted = '';
+    for (let i = 0; i < text.length; i++) {
+        encrypted += String.fromCharCode(text.charCodeAt(i) ^ key.charCodeAt(i % key.length));
+    }
+    return Buffer.from(encrypted).toString('hex'); // Преобразуем результат в hex
 }
 
 // Функция расшифровки
-function decrypt(text) {
-    const [iv, encryptedText] = text.split(':').map(part => Buffer.from(part, 'hex'));
-    const decipher = crypto.createDecipheriv('aes-256-cbc', Buffer.from(ENCRYPTION_KEY), iv);
-    let decrypted = decipher.update(encryptedText);
-    decrypted = Buffer.concat([decrypted, decipher.final()]);
-    return decrypted.toString();
+function decrypt(encryptedHex) {
+    const key = ENCRYPTION_KEY.slice(0, IV_LENGTH); // Берем те же IV_LENGTH символов ключа
+    const encrypted = Buffer.from(encryptedHex, 'hex').toString(); // Преобразуем hex в строку
+    let decrypted = '';
+    for (let i = 0; i < encrypted.length; i++) {
+        decrypted += String.fromCharCode(encrypted.charCodeAt(i) ^ key.charCodeAt(i % key.length));
+    }
+    return decrypted;
 }
 
 // Функция для чтения JSON-файла
