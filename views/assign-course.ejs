@@ -4,25 +4,42 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Выдача курса</title>
+    <!-- Подключение Bootstrap -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
 <body>
-    <h1>Выдать курс</h1>
-    <form action="/assign-course" method="POST">
-        <label for="username">Имя пользователя:</label>
-        <input type="text" id="username" name="username" required><br><br>
+    <div class="container mt-5">
+        <h1 class="text-center mb-4">Выдача курса</h1>
+        
+        <form action="/assign-course" method="POST">
+            <!-- Имя пользователя -->
+            <div class="mb-3">
+                <label for="username" class="form-label">Имя пользователя:</label>
+                <input type="text" class="form-control" id="username" name="username" required>
+            </div>
 
-        <label for="course">Выберите курс:</label>
-        <select id="course" name="course" required>
-            <option value="Основы HTML">Основы HTML</option>
-            <option value="Основы Git">Основы Git</option>
-            <option value="Основы работы с компьютером">Основы работы с компьютером</option>
-            <option value="Junior Python Developer">Junior Python Developer</option>
-            <option value="Junior Frontend Developer">Junior Frontend Developer</option>
-            <option value="Middle Frontend Developer">Middle Frontend Developer</option>
-            <option value="Накрутка опыта работы">Накрутка опыта работы</option>
-        </select><br><br>
+            <!-- Выбор курса -->
+            <div class="mb-3">
+                <label for="course" class="form-label">Выберите курс:</label>
+                <select id="course" name="course" class="form-select" required>
+                    <option value="Основы HTML">Основы HTML</option>
+                    <option value="Основы Git">Основы Git</option>
+                    <option value="Основы работы с компьютером">Основы работы с компьютером</option>
+                    <option value="Junior Python Developer">Junior Python Developer</option>
+                    <option value="Junior Frontend Developer">Junior Frontend Developer</option>
+                    <option value="Middle Frontend Developer">Middle Frontend Developer</option>
+                    <option value="Накрутка опыта работы">Накрутка опыта работы</option>
+                </select>
+            </div>
 
-        <button type="submit">Выдать курс</button>
-    </form>
+            <!-- Кнопка отправки -->
+            <div class="d-grid gap-2">
+                <button type="submit" class="btn btn-primary">Выдать курс</button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Подключение Bootstrap JS и зависимостей -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
