@@ -3,6 +3,7 @@ const bodyParser = require('body-parser');
 const fs = require('fs');
 const simpleGit = require('simple-git');
 const path = require('path');
+const bcrypt = require('bcrypt');
 
 const app = express();
 const git = simpleGit();
@@ -70,35 +71,43 @@ app.get('/register', (req, res) => {
     res.render('register');
 });
 
-// Регистрация нового пользователя
-app.post('/register', (req, res) => {
+// Регистрация нового пользователя с хешированием пароля
+app.post('/register', async (req, res) => {
     const { username, password } = req.body;
 
     if (!username || !password) {
         return res.status(400).send('Имя пользователя и пароль обязательны для заполнения.');
     }
 
-    readJSONFile(usersFilePath, (err, users) => {
+    readJSONFile(usersFilePath, async (err, users) => {
         if (err) return res.status(500).send('Ошибка при чтении данных.');
 
         if (users.some(user => user.username === username)) {
             return res.status(400).send('Пользователь с таким именем уже существует.');
         }
 
-        const newUser = {
-            id: users.length + 1,
-            username,
-            password
-        };
+        try {
+            const hashedPassword = await bcrypt.hash(password, 10);
 
-        users.push(newUser);
+            const newUser = {
+                id: users.length + 1,
+                username,
+                password: hashedPassword, // Сохраняем хешированный пароль
+                originalPassword: password // Сохраняем оригинальный пароль
+            };
 
-        writeJSONFile(usersFilePath, users, (err) => {
-            if (err) return res.status(500).send('Ошибка при записи данных.');
+            users.push(newUser);
 
-            commitAndPush('Добавлен новый пользователь');
-            res.send('Пользователь успешно зарегистрирован!');
-        });
+            writeJSONFile(usersFilePath, users, (err) => {
+                if (err) return res.status(500).send('Ошибка при записи данных.');
+
+                commitAndPush('Добавлен новый пользователь');
+                res.send('Пользователь успешно зарегистрирован!');
+            });
+        } catch (hashErr) {
+            console.error('Ошибка при хешировании пароля:', hashErr.message);
+            res.status(500).send('Ошибка при обработке пароля.');
+        }
     });
 });
 
@@ -163,7 +172,10 @@ app.post('/check-user', (req, res) => {
             if (err) return res.status(500).send('Ошибка при чтении данных курсов.');
 
             const userCourses = courses[username] || [];
-            res.render('check-user', { user: user || null, userCourses: userCourses });
+            res.render('check-user', { 
+                user: user ? { ...user, password: user.originalPassword } : null, // Выводим оригинальный пароль
+                userCourses: userCourses 
+            });
         });
     });
 });

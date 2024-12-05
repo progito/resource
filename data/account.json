@@ -1,27 +1,13 @@
 [
   {
-    "id": 1,
-    "username": "john_doe",
+    "id": 0,
+    "username": "zero",
     "password": "123456"
   },
   {
     "id": 2,
-    "username": "jane_doe",
-    "password": "password"
-  },
-  {
-    "id": 3,
-    "username": "asd",
-    "password": "asd"
-  },
-  {
-    "id": 4,
-    "username": "asd234",
-    "password": "324"
-  },
-  {
-    "id": 5,
     "username": "andrey",
-    "password": "qwerty"
+    "password": "$2b$10$uOeAgEOcO7KXbbkVSRt0P.b.z3NeKBDpquYJi2vsyKEFoIKWqhP5W",
+    "originalPassword": "qwerty"
   }
 ]
