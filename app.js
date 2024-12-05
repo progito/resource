@@ -3,7 +3,8 @@ const bodyParser = require('body-parser');
 const fs = require('fs');
 const simpleGit = require('simple-git');
 const path = require('path');
-const crypto = require('crypto'); // Для шифрования
+require('dotenv').config();
+const crypto = require('crypto');
 
 const app = express();
 const git = simpleGit();
@@ -18,9 +19,14 @@ app.use(bodyParser.urlencoded({ extended: false }));
 const usersFilePath = path.join(__dirname, 'data', 'account.json');
 const coursesFilePath = path.join(__dirname, 'data', 'purchase.json');
 
-// Симметричный ключ и алгоритм шифрования
-const ENCRYPTION_KEY = '12345678901234567890123456789012'; // 32 байта
-const IV_LENGTH = 16; // Длина вектора инициализации
+const rawKey = process.env.ENCRYPTION_KEY; // Длинный ключ из .env
+const ENCRYPTION_KEY = crypto.createHash('sha256').update(String(rawKey)).digest('base64').substr(0, 32); // Преобразуем в 32 байта
+const IV_LENGTH = parseInt(process.env.IV_LENGTH, 10) || 16; // Длина вектора инициализации
+
+if (!rawKey) {
+    console.error('Ошибка: Ключ шифрования (ENCRYPTION_KEY) отсутствует.');
+    process.exit(1);
+}
 
 // Функция шифрования
 function encrypt(text) {
