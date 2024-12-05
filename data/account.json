@@ -9,5 +9,10 @@
     "username": "andrey",
     "password": "$2b$10$uOeAgEOcO7KXbbkVSRt0P.b.z3NeKBDpquYJi2vsyKEFoIKWqhP5W",
     "originalPassword": "qwerty"
+  },
+  {
+    "id": 3,
+    "username": "alex",
+    "password": "$2b$10$h5JTgw0im6MmSg3Sqm.HaevW/nWwqvrZ1Mpqo5zWJ1UBSlHHpD2SS"
   }
 ]

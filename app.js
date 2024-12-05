@@ -92,8 +92,7 @@ app.post('/register', async (req, res) => {
             const newUser = {
                 id: users.length + 1,
                 username,
-                password: hashedPassword, // Сохраняем хешированный пароль
-                originalPassword: password // Сохраняем оригинальный пароль
+                password: hashedPassword // Сохраняем только хешированный пароль
             };
 
             users.push(newUser);
@@ -152,29 +151,36 @@ app.post('/assign-course', (req, res) => {
 
 // Маршрут страницы проверки пользователя
 app.get('/check-user', (req, res) => {
-    res.render('check-user', { user: null, userCourses: [] });
+    res.render('check-user', { user: null, userCourses: [], passwordMatch: null });
 });
 
 // Проверка пользователя
-app.post('/check-user', (req, res) => {
-    const { username } = req.body;
+app.post('/check-user', async (req, res) => {
+    const { username, password } = req.body;
 
-    if (!username) {
-        return res.status(400).send('Имя пользователя обязательно для проверки.');
+    if (!username || !password) {
+        return res.status(400).send('Имя пользователя и пароль обязательны для проверки.');
     }
 
-    readJSONFile(usersFilePath, (err, users) => {
+    readJSONFile(usersFilePath, async (err, users) => {
         if (err) return res.status(500).send('Ошибка при чтении данных пользователей.');
 
         const user = users.find(u => u.username === username);
+
+        if (!user) {
+            return res.render('check-user', { user: null, userCourses: [], passwordMatch: false });
+        }
+
+        const isPasswordMatch = await bcrypt.compare(password, user.password);
 
         readJSONFile(coursesFilePath, (err, courses) => {
             if (err) return res.status(500).send('Ошибка при чтении данных курсов.');
 
             const userCourses = courses[username] || [];
-            res.render('check-user', { 
-                user: user ? { ...user, password: user.originalPassword } : null, // Выводим оригинальный пароль
-                userCourses: userCourses 
+            res.render('check-user', {
+                user: isPasswordMatch ? user : null,
+                userCourses: isPasswordMatch ? userCourses : [],
+                passwordMatch: isPasswordMatch
             });
         });
     });
