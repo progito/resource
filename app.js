@@ -3,7 +3,7 @@ const bodyParser = require('body-parser');
 const fs = require('fs');
 const simpleGit = require('simple-git');
 const path = require('path');
-const bcrypt = require('bcrypt');
+const crypto = require('crypto'); // Для шифрования
 
 const app = express();
 const git = simpleGit();
@@ -17,6 +17,28 @@ app.use(bodyParser.urlencoded({ extended: false }));
 
 const usersFilePath = path.join(__dirname, 'data', 'account.json');
 const coursesFilePath = path.join(__dirname, 'data', 'purchase.json');
+
+// Симметричный ключ и алгоритм шифрования
+const ENCRYPTION_KEY = '12345678901234567890123456789012'; // 32 байта
+const IV_LENGTH = 16; // Длина вектора инициализации
+
+// Функция шифрования
+function encrypt(text) {
+    const iv = crypto.randomBytes(IV_LENGTH);
+    const cipher = crypto.createCipheriv('aes-256-cbc', Buffer.from(ENCRYPTION_KEY), iv);
+    let encrypted = cipher.update(text);
+    encrypted = Buffer.concat([encrypted, cipher.final()]);
+    return `${iv.toString('hex')}:${encrypted.toString('hex')}`;
+}
+
+// Функция расшифровки
+function decrypt(text) {
+    const [iv, encryptedText] = text.split(':').map(part => Buffer.from(part, 'hex'));
+    const decipher = crypto.createDecipheriv('aes-256-cbc', Buffer.from(ENCRYPTION_KEY), iv);
+    let decrypted = decipher.update(encryptedText);
+    decrypted = Buffer.concat([decrypted, decipher.final()]);
+    return decrypted.toString();
+}
 
 // Функция для чтения JSON-файла
 function readJSONFile(filePath, callback) {
@@ -71,42 +93,38 @@ app.get('/register', (req, res) => {
     res.render('register');
 });
 
-// Регистрация нового пользователя с хешированием пароля
-app.post('/register', async (req, res) => {
+// Регистрация нового пользователя
+app.post('/register', (req, res) => {
     const { username, password } = req.body;
 
     if (!username || !password) {
         return res.status(400).send('Имя пользователя и пароль обязательны для заполнения.');
     }
 
-    readJSONFile(usersFilePath, async (err, users) => {
+    readJSONFile(usersFilePath, (err, users) => {
         if (err) return res.status(500).send('Ошибка при чтении данных.');
 
         if (users.some(user => user.username === username)) {
             return res.status(400).send('Пользователь с таким именем уже существует.');
         }
 
-        try {
-            const hashedPassword = await bcrypt.hash(password, 10);
+        // Шифрование пароля
+        const encryptedPassword = encrypt(password);
 
-            const newUser = {
-                id: users.length + 1,
-                username,
-                password: hashedPassword // Сохраняем только хешированный пароль
-            };
+        const newUser = {
+            id: users.length + 1,
+            username,
+            password: encryptedPassword // Сохраняем зашифрованный пароль
+        };
 
-            users.push(newUser);
+        users.push(newUser);
 
-            writeJSONFile(usersFilePath, users, (err) => {
-                if (err) return res.status(500).send('Ошибка при записи данных.');
+        writeJSONFile(usersFilePath, users, (err) => {
+            if (err) return res.status(500).send('Ошибка при записи данных.');
 
-                commitAndPush('Добавлен новый пользователь');
-                res.send('Пользователь успешно зарегистрирован!');
-            });
-        } catch (hashErr) {
-            console.error('Ошибка при хешировании пароля:', hashErr.message);
-            res.status(500).send('Ошибка при обработке пароля.');
-        }
+            commitAndPush('Добавлен новый пользователь');
+            res.send('Пользователь успешно зарегистрирован!');
+        });
     });
 });
 
@@ -151,44 +169,36 @@ app.post('/assign-course', (req, res) => {
 
 // Маршрут страницы проверки пользователя
 app.get('/check-user', (req, res) => {
-    res.render('check-user', { user: null, userCourses: [], passwordMatch: null });
+    res.render('check-user', { user: null, userCourses: [] });
 });
 
 // Проверка пользователя
-app.post('/check-user', async (req, res) => {
-    const { username, password } = req.body;
+app.post('/check-user', (req, res) => {
+    const { username } = req.body;
 
-    if (!username || !password) {
-        return res.status(400).send('Имя пользователя и пароль обязательны для проверки.');
+    if (!username) {
+        return res.status(400).send('Имя пользователя обязательно для проверки.');
     }
 
-    readJSONFile(usersFilePath, async (err, users) => {
+    readJSONFile(usersFilePath, (err, users) => {
         if (err) return res.status(500).send('Ошибка при чтении данных пользователей.');
 
         const user = users.find(u => u.username === username);
 
-        if (!user) {
-            return res.render('check-user', { user: null, userCourses: [], passwordMatch: false });
-        }
-
-        const isPasswordMatch = await bcrypt.compare(password, user.password);
-
         readJSONFile(coursesFilePath, (err, courses) => {
             if (err) return res.status(500).send('Ошибка при чтении данных курсов.');
 
-            const userCourses = courses[username] || [];
-            res.render('check-user', {
-                user: isPasswordMatch ? user : null,
-                userCourses: isPasswordMatch ? userCourses : [],
-                passwordMatch: isPasswordMatch
-            });
+            let decryptedPassword = null;
+            if (user) {
+                // Расшифровка пароля
+                decryptedPassword = decrypt(user.password);
+                user.password = decryptedPassword;
+            }
+
+            const userCourses = user ? courses[username] || [] : [];
+            res.render('check-user', { user: user || null, userCourses });
         });
     });
-});
-
-// Маршрут страницы аналитики (заготовка)
-app.get('/analytics', (req, res) => {
-    res.render('analytics');
 });
 
 // Запуск сервера

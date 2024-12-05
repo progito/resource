@@ -27,7 +27,7 @@
                     <thead>
                         <tr>
                             <th>Имя пользователя</th>
-                            <th>Пароль</th>
+                            <th>Пароль (хешированный)</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -50,7 +50,7 @@
                 <% } %>
             </div>
         <% } else if (user === null) { %>
-            <p class="mt-4 text-danger">Пользователь не найден.</p>
+            <p class="mt-4 text-danger">Пользователь с таким именем не найден.</p>
         <% } %>
 
     </div>
