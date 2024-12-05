@@ -20,6 +20,12 @@ app.use(bodyParser.urlencoded({ extended: false }));
 const usersFilePath = path.join(__dirname, 'data', 'account.json');
 const coursesFilePath = path.join(__dirname, 'data', 'purchase.json');
 
+// Страница для назначения курса
+app.get('/assign-course', (req, res) => {
+    res.render('assign-course');
+});
+
+
 // Главная страница
 app.get('/', (req, res) => {
     res.render('index'); // Ожидается, что файл index.ejs находится в папке views
@@ -34,6 +40,55 @@ app.get('/register', (req, res) => {
 app.get('/analytics', (req, res) => {
     res.render('analytics');
 });
+
+
+app.post('/assign-course', (req, res) => {
+    const { username, course } = req.body;
+
+    // Чтение данных пользователей и курсов
+    fs.readFile(usersFilePath, (err, data) => {
+        if (err) {
+            return res.status(500).send('Ошибка при чтении данных пользователей.');
+        }
+
+        const users = JSON.parse(data);
+
+        const user = users.find(user => user.username === username);
+        if (!user) {
+            return res.status(404).send('Пользователь не найден.');
+        }
+
+        fs.readFile(coursesFilePath, (err, data) => {
+            if (err) {
+                return res.status(500).send('Ошибка при чтении данных курсов.');
+            }
+
+            const courses = JSON.parse(data);
+
+            // Проверка, что курс еще не был выдан
+            if (courses[username] && courses[username].includes(course)) {
+                return res.status(400).send('Курс уже выдан этому пользователю.');
+            }
+
+            // Добавляем курс пользователю
+            if (!courses[username]) {
+                courses[username] = [];
+            }
+            courses[username].push(course);
+
+            // Запись обновленных данных в JSON
+            fs.writeFile(coursesFilePath, JSON.stringify(courses, null, 2), (err) => {
+                if (err) {
+                    return res.status(500).send('Ошибка при записи данных курсов.');
+                }
+                // Коммит и пуш изменений в Git
+                commitAndPush('Выдан курс');
+                res.send('Курс успешно выдан пользователю!');
+            });
+        });
+    });
+});
+
 
 // Регистрация нового пользователя
 app.post('/register', (req, res) => {

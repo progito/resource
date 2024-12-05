@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Выдача курса</title>
+</head>
+<body>
+    <h1>Выдать курс</h1>
+    <form action="/assign-course" method="POST">
+        <label for="username">Имя пользователя:</label>
+        <input type="text" id="username" name="username" required><br><br>
+
+        <label for="course">Выберите курс:</label>
+        <select id="course" name="course" required>
+            <option value="Основы HTML">Основы HTML</option>
+            <option value="Основы Git">Основы Git</option>
+            <option value="Основы работы с компьютером">Основы работы с компьютером</option>
+            <option value="Junior Python Developer">Junior Python Developer</option>
+            <option value="Junior Frontend Developer">Junior Frontend Developer</option>
+            <option value="Middle Frontend Developer">Middle Frontend Developer</option>
+            <option value="Накрутка опыта работы">Накрутка опыта работы</option>
+        </select><br><br>
+
+        <button type="submit">Выдать курс</button>
+    </form>
+</body>
+</html>
