@@ -21,10 +21,20 @@ const coursesFilePath = path.join(__dirname, 'data', 'purchase.json');
 // Получаем ключ шифрования из .env
 const ENCRYPTION_KEY = process.env.ENCRYPTION_KEY; // Например, 84578268387546481237648362847623875623
 const IV_LENGTH = parseInt(process.env.IV_LENGTH, 10) || 16; // Для совместимости с текущим кодом
+// Преобразование строки в hex
+function stringToHex(str) {
+    return Array.from(str)
+        .map(char => char.charCodeAt(0).toString(16).padStart(2, '0'))
+        .join('');
+}
 
-if (!ENCRYPTION_KEY) {
-    console.error('Ошибка: Ключ шифрования (ENCRYPTION_KEY) отсутствует.');
-    process.exit(1);
+// Преобразование hex в строку
+function hexToString(hex) {
+    let result = '';
+    for (let i = 0; i < hex.length; i += 2) {
+        result += String.fromCharCode(parseInt(hex.substr(i, 2), 16));
+    }
+    return result;
 }
 
 // Функция шифрования
@@ -34,18 +44,7 @@ function encrypt(text) {
     for (let i = 0; i < text.length; i++) {
         encrypted += String.fromCharCode(text.charCodeAt(i) ^ key.charCodeAt(i % key.length));
     }
-    return Buffer.from(encrypted).toString('hex'); // Преобразуем результат в hex
-}
-
-// Функция расшифровки
-function decrypt(encryptedHex) {
-    const key = ENCRYPTION_KEY.slice(0, IV_LENGTH); // Берем те же IV_LENGTH символов ключа
-    const encrypted = Buffer.from(encryptedHex, 'hex').toString(); // Преобразуем hex в строку
-    let decrypted = '';
-    for (let i = 0; i < encrypted.length; i++) {
-        decrypted += String.fromCharCode(encrypted.charCodeAt(i) ^ key.charCodeAt(i % key.length));
-    }
-    return decrypted;
+    return stringToHex(encrypted); // Преобразуем зашифрованную строку в hex
 }
 
 // Функция для чтения JSON-файла
