@@ -28,6 +28,18 @@ function stringToHex(str) {
         .join('');
 }
 
+const courseDescriptions = {
+    "Основы HTML": "Этот курс познакомит вас с основами веб-разработки, включая работу с HTML.",
+    "Основы Git": "Курс по основам системы контроля версий Git.",
+    "Основы работы с компьютером": "Этот курс поможет вам освоить базовые навыки работы с ПК.",
+    "Junior Python Developer": "Курс для начинающих разработчиков на Python.",
+    "Junior Frontend Developer": "Основы фронтенд-разработки для начинающих.",
+    "Middle Frontend Developer": "Курс для разработчиков с опытом, углубление знаний в фронтенд-технологиях.",
+    "Накрутка опыта работы": "Курс по развитию карьерных навыков и достижений."
+};
+
+
+
 // Преобразование hex в строку
 function hexToString(hex) {
     let result = '';
@@ -162,7 +174,12 @@ app.post('/assign-course', (req, res) => {
             }
 
             if (!courses[username]) courses[username] = [];
-            courses[username].push(course);
+
+            courses[username].push({ 
+                course: course,
+                description: courseDescriptions[course],
+                progress: 0 // Начальный прогресс 0
+            });
 
             writeJSONFile(coursesFilePath, courses, (err) => {
                 if (err) return res.status(500).send('Ошибка при записи данных курсов.');
