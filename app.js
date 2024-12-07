@@ -154,8 +154,9 @@ app.get('/assign-course', (req, res) => {
 
 // Выдача курса пользователю
 app.post('/assign-course', (req, res) => {
-    const { username, course } = req.body;
+    const { username, course, price } = req.body; // Извлекаем цену из тела запроса
 
+    // Проверка обязательных полей
     if (!username || !course) {
         return res.status(400).send('Имя пользователя и курс обязательны для заполнения.');
     }
@@ -169,16 +170,20 @@ app.post('/assign-course', (req, res) => {
         readJSONFile(coursesFilePath, (err, courses) => {
             if (err) return res.status(500).send('Ошибка при чтении данных курсов.');
 
-            if (courses[username]?.includes(course)) {
+            // Проверяем, что курс не был выдан ранее
+            if (courses[username]?.some(entry => entry.course === course)) {
                 return res.status(400).send('Курс уже выдан этому пользователю.');
             }
 
+            // Инициализируем массив курсов для пользователя, если его ещё нет
             if (!courses[username]) courses[username] = [];
 
-            courses[username].push({ 
+            // Добавляем курс с описанием, прогрессом и ценой
+            courses[username].push({
                 course: course,
-                description: courseDescriptions[course],
-                progress: 0 // Начальный прогресс 0
+                description: courseDescriptions[course]?.[0] || "Описание отсутствует",
+                price: price || "Цена не указана",
+                progress: 0 // Начальный прогресс
             });
 
             writeJSONFile(coursesFilePath, courses, (err) => {
@@ -190,6 +195,7 @@ app.post('/assign-course', (req, res) => {
         });
     });
 });
+
 
 // Маршрут страницы проверки пользователя
 app.get('/check-user', (req, res) => {
