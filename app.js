@@ -243,6 +243,34 @@ app.post('/check-user', (req, res) => {
     });
 });
 
+const testFilePath = path.join(__dirname, 'data', 'test.txt');
+
+// Маршрут для тестового коммита
+app.get('/test-commit', async (req, res) => {
+    try {
+        // Генерация случайного числа
+        const randomNumber = Math.floor(Math.random() * 1000);
+
+        // Добавление случайного числа в файл
+        fs.appendFileSync(testFilePath, `${randomNumber}\n`);
+
+        console.log(`Добавлено число: ${randomNumber} в файл test.txt`);
+
+        // Коммит изменений
+        await git.add('./data/test.txt');
+        await git.commit('Тестовый коммит: добавлено случайное число');
+        await git.push('origin', 'main');
+
+        console.log('Изменения успешно закоммичены и отправлены.');
+
+        // Ответ клиенту
+        res.send(`Тестовый коммит выполнен! Добавлено число: ${randomNumber}`);
+    } catch (error) {
+        console.error('Ошибка при выполнении тестового коммита:', error);
+        res.status(500).send('Произошла ошибка при выполнении тестового коммита.');
+    }
+});
+
 
 // Запуск сервера
 app.listen(port, () => {
