@@ -177,11 +177,10 @@ app.post('/assign-course', (req, res) => {
 
             // Инициализируем массив курсов для пользователя, если его ещё нет
             if (!courses[username]) courses[username] = [];
-            console.log(courseDescriptions)
             // Добавляем курс с описанием, прогрессом и ценой
             courses[username].push({
                 course: course,
-                description: courseDescriptions[course]?.[0] || "Описание отсутствует",
+                description: courseDescriptions[course] || "Описание отсутствует",
                 price: price || "Цена не указана",
                 progress: 0 // Начальный прогресс
             });
