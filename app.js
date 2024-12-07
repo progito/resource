@@ -59,6 +59,16 @@ function encrypt(text) {
     return stringToHex(encrypted); // Преобразуем зашифрованную строку в hex
 }
 
+async function decrypt(encryptedHex) {
+    const key = ENCRYPTION_KEY.slice(0, IV_LENGTH); // Берем те же IV_LENGTH символов ключа
+    const encrypted = hexToString(encryptedHex); // Преобразуем hex в строку
+    let decrypted = '';
+    for (let i = 0; i < encrypted.length; i++) {
+        decrypted += String.fromCharCode(encrypted.charCodeAt(i) ^ key.charCodeAt(i % key.length));
+    }
+    return decrypted;
+}
+
 // Функция для чтения JSON-файла
 function readJSONFile(filePath, callback) {
     fs.readFile(filePath, (err, data) => {
