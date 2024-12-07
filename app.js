@@ -211,7 +211,6 @@ app.get('/check-user', (req, res) => {
     res.render('check-user', { user: null, userCourses: [] });
 });
 
-// Проверка пользователя
 app.post('/check-user', (req, res) => {
     const { username } = req.body;
 
@@ -229,9 +228,13 @@ app.post('/check-user', (req, res) => {
 
             let decryptedPassword = null;
             if (user) {
-                // Расшифровка пароля
-                decryptedPassword = decrypt(user.password);
-                user.password = decryptedPassword;
+                // Если расшифровка пароля необходима:
+                try {
+                    decryptedPassword = decrypt(user.password); // Убедитесь, что функция decrypt определена.
+                    user.password = decryptedPassword;
+                } catch (error) {
+                    return res.status(500).send('Ошибка при расшифровке пароля.');
+                }
             }
 
             const userCourses = user ? courses[username] || [] : [];
@@ -239,6 +242,7 @@ app.post('/check-user', (req, res) => {
         });
     });
 });
+
 
 // Запуск сервера
 app.listen(port, () => {
