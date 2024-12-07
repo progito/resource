@@ -177,7 +177,7 @@ app.post('/assign-course', (req, res) => {
 
             // Инициализируем массив курсов для пользователя, если его ещё нет
             if (!courses[username]) courses[username] = [];
-
+            console.log(courseDescriptions)
             // Добавляем курс с описанием, прогрессом и ценой
             courses[username].push({
                 course: course,

@@ -8,6 +8,12 @@
       "description": "К",
       "price": "2099",
       "progress": 0
+    },
+    {
+      "course": "Основы HTML",
+      "description": "Э",
+      "price": "Бесплатно",
+      "progress": 0
     }
   ]
 }
