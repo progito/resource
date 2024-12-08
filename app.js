@@ -279,7 +279,7 @@ app.get('/add-certificate', (req, res) => {
 
 // Выдача сертификата
 app.post('/add-certificate', (req, res) => {
-    const { username, title } = req.body;
+    const { username, name, title } = req.body;
 
     if (!username || !title) {
         return res.status(400).send('Имя пользователя и курс обязательны для заполнения.');
@@ -298,6 +298,7 @@ app.post('/add-certificate', (req, res) => {
             id: certificates.length,
             username,
             title,
+            name
         };
 
         certificates.push(newCertificate);
