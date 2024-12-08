@@ -3,17 +3,5 @@
     "id": 0,
     "username": "zero",
     "title": "Основы HTML"
-  },
-  {
-    "id": 1,
-    "username": "andrey",
-    "title": "Основы HTML",
-    "name": "Андрей Чернов"
-  },
-  {
-    "id": 2,
-    "username": "andrey",
-    "title": "Junior Python Developer",
-    "name": "Андрей Чернов"
   }
 ]
