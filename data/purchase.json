@@ -6,5 +6,13 @@
       "price": "Бесплатно",
       "progress": 0
     }
+  ],
+  "aqeel": [
+    {
+      "course": "Junior Python Developer",
+      "description": "Курс для начинающих разработчиков на Python.",
+      "price": "32500",
+      "progress": 0
+    }
   ]
 }
