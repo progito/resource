@@ -272,6 +272,48 @@ app.get('/test-commit', async (req, res) => {
 });
 
 
+// Маршрут страницы выдачи сертификатов
+app.get('/add-certificate', (req, res) => {
+    res.render('add-certificate');
+});
+
+// Выдача сертификата
+app.post('/add-certificate', (req, res) => {
+    const { username, title } = req.body;
+
+    if (!username || !title) {
+        return res.status(400).send('Имя пользователя и курс обязательны для заполнения.');
+    }
+
+    const certificatesFilePath = path.join(__dirname, 'data', 'cert.json');
+
+    // Чтение файла сертификатов
+    readJSONFile(certificatesFilePath, (err, certificates) => {
+        if (err) {
+            return res.status(500).send('Ошибка при чтении данных сертификатов.');
+        }
+
+        // Создание новой записи сертификата
+        const newCertificate = {
+            id: certificates.length,
+            username,
+            title,
+        };
+
+        certificates.push(newCertificate);
+
+        // Запись в файл
+        writeJSONFile(certificatesFilePath, certificates, (err) => {
+            if (err) {
+                return res.status(500).send('Ошибка при записи данных сертификатов.');
+            }
+
+            commitAndPush('Добавлен новый сертификат');
+            res.send('Сертификат успешно выдан!');
+        });
+    });
+});
+
 // Запуск сервера
 app.listen(port, () => {
     console.log(`Сервер работает на http://localhost:${port}`);
