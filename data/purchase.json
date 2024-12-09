@@ -14,5 +14,13 @@
       "price": "32500",
       "progress": 0
     }
+  ],
+  "andrey": [
+    {
+      "course": "Основы Git",
+      "description": "Курс по основам системы контроля версий Git.",
+      "price": "2099",
+      "progress": 0
+    }
   ]
 }
