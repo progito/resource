@@ -42,5 +42,13 @@
       "price": "5800",
       "progress": 0
     }
+  ],
+  "fanil123": [
+    {
+      "course": "Junior Python Developer",
+      "description": "Курс для начинающих разработчиков на Python.",
+      "price": "Цена не указана",
+      "progress": 0
+    }
   ]
 }
