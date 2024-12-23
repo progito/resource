@@ -33,6 +33,12 @@
       "description": "Этот курс поможет вам освоить базовые навыки работы с ПК.",
       "price": "1490",
       "progress": 0
+    },
+    {
+      "course": "Junior Frontend Developer",
+      "description": "Основы фронтенд-разработки для начинающих.",
+      "price": "17990",
+      "progress": 0
     }
   ],
   "egor": [
